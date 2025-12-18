@@ -72,7 +72,7 @@ function NavigatePage() {
   } = useRoute(location?.lat ?? null, location?.lng ?? null, destLat, destLng);
 
   const mapRef = useRef<MapRef>(null);
-  const [hasSavedAddress, setHasSavedAddress] = useState(false);
+  const hasSavedRef = useRef(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -89,11 +89,11 @@ function NavigatePage() {
   }, [startWatching, stopWatching, passedStartLat, passedStartLng]);
 
   useEffect(() => {
-    if (!hasSavedAddress && address && destLat && destLng) {
+    if (!hasSavedRef.current && address && destLat && destLng) {
+      hasSavedRef.current = true;
       saveAddress({ address, lat: destLat, lng: destLng });
-      setHasSavedAddress(true);
     }
-  }, [address, destLat, destLng, hasSavedAddress, saveAddress]);
+  }, [address, destLat, destLng, saveAddress]);
 
   useEffect(() => {
     if (location && mapRef.current) {
