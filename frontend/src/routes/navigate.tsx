@@ -77,7 +77,7 @@ function NavigatePage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navRouter({ to: "/login" });
+      navRouter({ to: "/login", replace: true });
     }
   }, [authLoading, isAuthenticated, navRouter]);
 

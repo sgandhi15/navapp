@@ -103,10 +103,14 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="notion-input"
-                  placeholder={isRegister ? "Create a password" : "Enter your password"}
+                  placeholder={
+                    isRegister ? "Create a password" : "Enter your password"
+                  }
                   required
                   minLength={6}
-                  autoComplete={isRegister ? "new-password" : "current-password"}
+                  autoComplete={
+                    isRegister ? "new-password" : "current-password"
+                  }
                 />
               </div>
 
@@ -198,7 +202,9 @@ function LoginPage() {
             ].map((feature, i) => (
               <div key={i} className="text-center">
                 <div className="text-2xl mb-1">{feature.icon}</div>
-                <div className="text-[12px] text-[#787774]">{feature.label}</div>
+                <div className="text-[12px] text-[#787774]">
+                  {feature.label}
+                </div>
               </div>
             ))}
           </div>

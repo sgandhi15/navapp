@@ -39,7 +39,7 @@ function HomePage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navigate({ to: "/login" });
+      navigate({ to: "/login", replace: true });
     }
   }, [authLoading, isAuthenticated, navigate]);
 
