@@ -1,4 +1,10 @@
-import { useState, useEffect, createContext, useContext, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useCallback,
+} from "react";
 
 interface Toast {
   id: string;
@@ -38,7 +44,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2">
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onClose={removeToast} />
         ))}
@@ -57,46 +63,52 @@ function ToastItem({
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose(toast.id);
-    }, 4000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [toast.id, onClose]);
 
-  const bgColor = {
-    success: "bg-emerald-500",
-    error: "bg-red-500",
-    info: "bg-blue-500",
-  }[toast.type];
-
-  const icon = {
-    success: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M5 13l4 4L19 7"
-      />
-    ),
-    error: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M6 18L18 6M6 6l12 12"
-      />
-    ),
-    info: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    ),
+  const styles = {
+    success: {
+      bg: "bg-[#DBEDDB]",
+      text: "text-[#0F7B6C]",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M5 13l4 4L19 7"
+        />
+      ),
+    },
+    error: {
+      bg: "bg-[#FBE4E4]",
+      text: "text-[#E03E3E]",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      ),
+    },
+    info: {
+      bg: "bg-[#E7F0FD]",
+      text: "text-[#2F80ED]",
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      ),
+    },
   }[toast.type];
 
   return (
     <div
-      className={`${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[280px] animate-in slide-in-from-right duration-300`}
+      className={`${styles.bg} ${styles.text} px-4 py-3 rounded-lg shadow-md flex items-center gap-3 min-w-[200px] animate-fadeIn`}
     >
       <svg
         className="w-5 h-5 flex-shrink-0"
@@ -104,18 +116,23 @@ function ToastItem({
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
-        {icon}
+        {styles.icon}
       </svg>
-      <span className="text-sm font-medium flex-1">{toast.message}</span>
+      <span className="text-[14px] font-medium flex-1">{toast.message}</span>
       <button
         onClick={() => onClose(toast.id)}
-        className="text-white/80 hover:text-white"
+        className="opacity-60 hover:opacity-100 transition-opacity"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M6 18L18 6M6 6l12 12"
           />
         </svg>
@@ -123,4 +140,3 @@ function ToastItem({
     </div>
   );
 }
-

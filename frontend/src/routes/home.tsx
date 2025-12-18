@@ -14,7 +14,11 @@ function HomePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { addresses, isLoading: addressesLoading, deleteAddress } = useAddresses();
+  const {
+    addresses,
+    isLoading: addressesLoading,
+    deleteAddress,
+  } = useAddresses();
   const {
     location,
     error: locationError,
@@ -33,14 +37,12 @@ function HomePage() {
   const [manualLng, setManualLng] = useState("");
   const [manualLocationSet, setManualLocationSet] = useState(false);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navigate({ to: "/login" });
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  // Get the current location (either from geolocation or manual entry)
   const currentLocation = manualLocationSet
     ? { lat: parseFloat(manualLat), lng: parseFloat(manualLng) }
     : location;
@@ -50,14 +52,12 @@ function HomePage() {
     lat: number,
     lng: number
   ) => {
-    // Navigate to navigation page with destination params and current location
     navigate({
       to: "/navigate",
       search: {
         address,
         lat,
         lng,
-        // Pass current location if available
         ...(currentLocation && {
           startLat: currentLocation.lat,
           startLng: currentLocation.lng,
@@ -69,62 +69,65 @@ function HomePage() {
   const handleSetManualLocation = () => {
     const lat = parseFloat(manualLat);
     const lng = parseFloat(manualLng);
-    if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+    if (
+      !isNaN(lat) &&
+      !isNaN(lng) &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180
+    ) {
       setManualLocationSet(true);
       setShowManualLocation(false);
+      showToast("Location set successfully", "success");
     }
-  };
-
-  const handleUseDefaultLocation = () => {
-    // Default to a common location (can be changed)
-    setManualLat("47.6062");
-    setManualLng("-122.3321");
-    setManualLocationSet(true);
-    setShowManualLocation(false);
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#E3E2DF] border-t-[#37352F]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-slate-700/50 bg-slate-800/50 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-[#E3E2DF]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md bg-[#37352F] flex items-center justify-center">
               <svg
-                className="w-5 h-5 text-white"
+                className="w-4 h-4 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                strokeWidth={2}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-white">NavApp</h1>
+            <span className="font-semibold text-[#37352F] hidden sm:block">
+              NavApp
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400 text-sm">{user?.email}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[13px] text-[#787774] hidden sm:block">
+              {user?.email}
+            </span>
             <button
               onClick={logout}
-              className="text-slate-400 hover:text-white transition text-sm"
+              className="text-[13px] text-[#787774] hover:text-[#37352F] transition-colors"
             >
               Sign out
             </button>
@@ -132,167 +135,114 @@ function HomePage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-[28px] sm:text-[32px] font-semibold text-[#37352F] tracking-tight mb-2">
+            Where to?
+          </h1>
+          <p className="text-[15px] text-[#787774]">
+            Search for a destination or pick from your recent places
+          </p>
+        </div>
+
         {/* Location Status */}
         <div className="mb-6">
           {locationLoading && !manualLocationSet ? (
-            <div className="flex items-center gap-2 text-slate-400">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-500" />
+            <div className="flex items-center gap-2 text-[14px] text-[#787774]">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#E3E2DF] border-t-[#787774]" />
               <span>Getting your location...</span>
             </div>
           ) : manualLocationSet ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-cyan-400">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center justify-between p-3 bg-[#E7F0FD] rounded-lg">
+              <div className="flex items-center gap-2 text-[14px] text-[#2F80ED]">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path
-                    fillRule="evenodd"
-                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                    clipRule="evenodd"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
                 </svg>
-                <span className="text-sm">
-                  Manual location ({manualLat}, {manualLng})
-                </span>
+                <span>Manual location set</span>
               </div>
               <button
                 onClick={() => {
                   setManualLocationSet(false);
                   refreshLocation();
                 }}
-                className="text-xs text-slate-400 hover:text-white"
+                className="text-[13px] text-[#2F80ED] hover:underline"
               >
-                Try GPS again
+                Use GPS
               </button>
             </div>
           ) : locationError ? (
-            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/50">
+            <div className="p-4 bg-[#FBF3DB] rounded-lg">
               <div className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+                <span className="text-lg">📍</span>
                 <div className="flex-1">
-                  <p className="text-amber-400 text-sm font-medium">
+                  <p className="text-[14px] text-[#37352F] font-medium mb-1">
+                    Location unavailable
+                  </p>
+                  <p className="text-[13px] text-[#787774] mb-3">
                     {locationError}
                   </p>
-                  <p className="text-slate-400 text-xs mt-1">
-                    You can still search and navigate by entering your location
-                    manually.
-                  </p>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setShowManualLocation(true)}
-                      className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                      className="px-3 py-1.5 text-[13px] bg-white border border-[#E3E2DF] rounded-md hover:bg-[#F7F6F3] transition-colors"
                     >
                       Enter manually
                     </button>
                     <button
-                      onClick={handleUseDefaultLocation}
-                      className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
-                    >
-                      Use default location
-                    </button>
-                    <button
                       onClick={refreshLocation}
-                      className="px-3 py-1.5 text-xs text-slate-400 hover:text-white transition"
+                      className="px-3 py-1.5 text-[13px] text-[#787774] hover:text-[#37352F] transition-colors"
                     >
-                      Retry
+                      Try again
                     </button>
                   </div>
                 </div>
               </div>
             </div>
           ) : location ? (
-            <div className="flex items-center gap-2 text-emerald-400">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-center gap-2 text-[14px] text-[#0F7B6C]">
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
-                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm">
-                Location found ({location.lat.toFixed(4)},{" "}
-                {location.lng.toFixed(4)})
-              </span>
+              <span>Location ready</span>
             </div>
           ) : null}
         </div>
 
-        {/* Manual Location Modal */}
-        {showManualLocation && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-md mx-4 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Enter Your Location
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">
-                    Latitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={manualLat}
-                    onChange={(e) => setManualLat(e.target.value)}
-                    placeholder="e.g., 47.6062"
-                    className="w-full px-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">
-                    Longitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={manualLng}
-                    onChange={(e) => setManualLng(e.target.value)}
-                    placeholder="e.g., -122.3321"
-                    className="w-full px-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <p className="text-xs text-slate-500">
-                  Tip: You can get coordinates from Google Maps by right-clicking
-                  on a location.
-                </p>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowManualLocation(false)}
-                  className="flex-1 py-2 text-slate-400 hover:text-white transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSetManualLocation}
-                  disabled={!manualLat || !manualLng}
-                  className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition"
-                >
-                  Set Location
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Search Section */}
-        <div className="relative z-20 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 mb-8">
-          <h2 className="text-lg font-semibold text-white mb-4">
-            Where do you want to go?
-          </h2>
-
+        {/* Search */}
+        <div className="relative z-20 mb-10">
           <div className="relative">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9B9A97]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
             <input
               type="text"
               value={searchQuery}
@@ -301,19 +251,21 @@ function HomePage() {
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
-              placeholder="Enter destination address..."
-              className="w-full px-4 py-3 rounded-lg bg-slate-700/50 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              placeholder="Search for an address..."
+              className="w-full pl-10 pr-4 py-3 text-[15px] bg-[#F7F6F3] border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:bg-white transition-all placeholder:text-[#9B9A97]"
             />
+          </div>
 
-            {/* Suggestions Dropdown */}
-            {showSuggestions && searchQuery.length >= 3 && (
-              <div className="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-                {suggestionsLoading ? (
-                  <div className="p-4 text-center text-slate-400">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500 mx-auto" />
-                  </div>
-                ) : suggestions.length > 0 ? (
-                  suggestions.map((suggestion) => (
+          {/* Suggestions Dropdown */}
+          {showSuggestions && searchQuery.length >= 3 && (
+            <div className="absolute z-50 w-full mt-2 bg-white border border-[#E3E2DF] rounded-lg shadow-lg overflow-hidden animate-fadeIn">
+              {suggestionsLoading ? (
+                <div className="p-4 text-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#E3E2DF] border-t-[#787774] mx-auto" />
+                </div>
+              ) : suggestions.length > 0 ? (
+                <div className="max-h-[300px] overflow-y-auto">
+                  {suggestions.map((suggestion) => (
                     <button
                       key={suggestion.id}
                       onClick={() => {
@@ -324,117 +276,118 @@ function HomePage() {
                         );
                         setShowSuggestions(false);
                       }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-700 transition flex items-start gap-3"
+                      className="w-full px-4 py-3 text-left hover:bg-[#F7F6F3] transition-colors flex items-start gap-3 border-b border-[#E3E2DF] last:border-0"
                     >
                       <svg
-                        className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0"
+                        className="w-5 h-5 text-[#9B9A97] mt-0.5 flex-shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
+                        strokeWidth={1.5}
                       >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
                           d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                         />
                       </svg>
-                      <span className="text-white text-sm">
+                      <span className="text-[14px] text-[#37352F]">
                         {suggestion.address}
                       </span>
                     </button>
-                  ))
-                ) : (
-                  <div className="p-4 text-center text-slate-400 text-sm">
-                    No results found
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-[14px] text-[#787774]">
+                  No results found
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Address History */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
-            Recent Destinations
+        {/* Recent Destinations */}
+        <div>
+          <h2 className="text-[13px] font-medium text-[#9B9A97] uppercase tracking-wide mb-4">
+            Recent
           </h2>
 
           {addressesLoading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500" />
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#E3E2DF] border-t-[#787774]" />
             </div>
           ) : addresses.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {addresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  className="relative group"
-                >
+                <div key={addr.id} className="group relative">
                   <button
                     onClick={() =>
                       handleSelectDestination(addr.address, addr.lat, addr.lng)
                     }
-                    className="w-full px-4 py-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition flex items-start gap-3 text-left"
+                    className="w-full px-3 py-3 rounded-lg hover:bg-[#F7F6F3] transition-colors flex items-center gap-3 text-left"
                   >
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition">
+                    <div className="w-8 h-8 rounded-lg bg-[#F7F6F3] group-hover:bg-[#E3E2DF] flex items-center justify-center flex-shrink-0 transition-colors">
                       <svg
-                        className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition"
+                        className="w-4 h-4 text-[#787774]"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
+                        strokeWidth={1.5}
                       >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0 pr-8">
-                      <p className="text-white text-sm truncate">{addr.address}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">
-                        {new Date(addr.createdAt).toLocaleDateString()}
+                      <p className="text-[14px] text-[#37352F] truncate">
+                        {addr.address}
+                      </p>
+                      <p className="text-[12px] text-[#9B9A97] mt-0.5">
+                        {new Date(addr.createdAt).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </p>
                     </div>
                     <svg
-                      className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition"
+                      className="w-4 h-4 text-[#9B9A97] group-hover:text-[#787774] transition-colors"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
+                      strokeWidth={2}
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
                         d="M9 5l7 7-7 7"
                       />
                     </svg>
                   </button>
-                  {/* Delete button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteAddress(addr.id, {
-                        onSuccess: () => showToast("Address removed", "success"),
-                        onError: () => showToast("Failed to remove address", "error"),
+                        onSuccess: () => showToast("Removed", "success"),
+                        onError: () => showToast("Failed to remove", "error"),
                       });
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 rounded-lg transition"
-                    title="Remove from history"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:bg-[#FBE4E4] rounded-md transition-all"
+                    title="Remove"
                   >
                     <svg
-                      className="w-4 h-4 text-slate-400 hover:text-red-400"
+                      className="w-4 h-4 text-[#9B9A97] hover:text-[#E03E3E]"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
+                      strokeWidth={1.5}
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
                   </button>
@@ -442,28 +395,93 @@ function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <svg
-                className="w-12 h-12 text-slate-600 mx-auto mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <div className="text-center py-12 px-4">
+              <div className="w-12 h-12 rounded-full bg-[#F7F6F3] flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-6 h-6 text-[#9B9A97]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                   strokeWidth={1.5}
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                />
-              </svg>
-              <p className="text-slate-400">No recent destinations</p>
-              <p className="text-slate-500 text-sm mt-1">
-                Your navigation history will appear here
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                </svg>
+              </div>
+              <p className="text-[14px] text-[#37352F] font-medium mb-1">
+                No recent destinations
+              </p>
+              <p className="text-[13px] text-[#9B9A97]">
+                Search for a place to get started
               </p>
             </div>
           )}
         </div>
       </main>
+
+      {/* Manual Location Modal */}
+      {showManualLocation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl border border-[#E3E2DF] shadow-xl w-full max-w-md animate-fadeIn">
+            <div className="p-6">
+              <h3 className="text-[18px] font-semibold text-[#37352F] mb-1">
+                Enter location
+              </h3>
+              <p className="text-[14px] text-[#787774] mb-6">
+                Enter coordinates or get them from Google Maps
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[13px] font-medium text-[#37352F] mb-1.5">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={manualLat}
+                    onChange={(e) => setManualLat(e.target.value)}
+                    placeholder="e.g., 47.6062"
+                    className="notion-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-medium text-[#37352F] mb-1.5">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={manualLng}
+                    onChange={(e) => setManualLng(e.target.value)}
+                    placeholder="e.g., -122.3321"
+                    className="notion-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 p-4 border-t border-[#E3E2DF] bg-[#F7F6F3] rounded-b-xl">
+              <button
+                onClick={() => setShowManualLocation(false)}
+                className="flex-1 py-2 text-[14px] text-[#787774] hover:text-[#37352F] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSetManualLocation}
+                disabled={!manualLat || !manualLng}
+                className="flex-1 py-2 bg-[#2F80ED] hover:bg-[#2671D9] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-medium rounded-md transition-colors"
+              >
+                Set location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Click outside to close suggestions */}
       {showSuggestions && (

@@ -60,7 +60,6 @@ function NavigatePage() {
   } = useGeolocation();
   const { saveAddress } = useAddresses();
 
-  // Use passed location or geolocation
   const location =
     passedStartLat && passedStartLng
       ? { lat: passedStartLat, lng: passedStartLng, accuracy: 0 }
@@ -76,14 +75,12 @@ function NavigatePage() {
   const [hasSavedAddress, setHasSavedAddress] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navRouter({ to: "/login" });
     }
   }, [authLoading, isAuthenticated, navRouter]);
 
-  // Start watching location when component mounts (only if not using passed location)
   useEffect(() => {
     if (!passedStartLat || !passedStartLng) {
       startWatching();
@@ -91,7 +88,6 @@ function NavigatePage() {
     }
   }, [startWatching, stopWatching, passedStartLat, passedStartLng]);
 
-  // Save address to history (only once)
   useEffect(() => {
     if (!hasSavedAddress && address && destLat && destLng) {
       saveAddress({ address, lat: destLat, lng: destLng });
@@ -99,7 +95,6 @@ function NavigatePage() {
     }
   }, [address, destLat, destLng, hasSavedAddress, saveAddress]);
 
-  // Fit map to show both markers
   useEffect(() => {
     if (location && mapRef.current) {
       const bounds = [
@@ -108,13 +103,12 @@ function NavigatePage() {
       ] as [[number, number], [number, number]];
 
       mapRef.current.fitBounds(bounds, {
-        padding: { top: 100, bottom: 250, left: 50, right: 50 },
+        padding: { top: 80, bottom: 280, left: 40, right: 40 },
         duration: 1000,
       });
     }
   }, [location?.lat, location?.lng, destLat, destLng]);
 
-  // Refetch route when location changes significantly (only for live tracking)
   useEffect(() => {
     if (geoLocation && isWatching && !passedStartLat) {
       const timer = setTimeout(() => {
@@ -137,51 +131,48 @@ function NavigatePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
+      <div className="h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#E3E2DF] border-t-[#37352F]" />
       </div>
     );
   }
 
-  // Check for Mapbox token
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="h-screen w-screen bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-slate-800 rounded-2xl p-8 max-w-md text-center border border-slate-700">
-          <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+      <div className="h-screen bg-[#F7F6F3] flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl border border-[#E3E2DF] p-8 max-w-md text-center">
+          <div className="w-12 h-12 rounded-full bg-[#FBE4E4] flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-red-400"
+              className="w-6 h-6 text-[#E03E3E]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              strokeWidth={2}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">
-            Map Configuration Missing
+          <h2 className="text-[18px] font-semibold text-[#37352F] mb-2">
+            Map not configured
           </h2>
-          <p className="text-slate-400 text-sm mb-4">
-            Mapbox token is not configured. Please add VITE_MAPBOX_TOKEN to your
-            environment variables.
+          <p className="text-[14px] text-[#787774] mb-6">
+            Please add your Mapbox token to the environment variables.
           </p>
           <button
             onClick={handleBack}
-            className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+            className="px-6 py-2 bg-[#F7F6F3] hover:bg-[#E3E2DF] text-[#37352F] text-[14px] font-medium rounded-md transition-colors"
           >
-            Go Back
+            Go back
           </button>
         </div>
       </div>
     );
   }
 
-  // Route line layer style
   const routeLayer = {
     id: "route",
     type: "line" as const,
@@ -190,22 +181,22 @@ function NavigatePage() {
       "line-cap": "round" as const,
     },
     paint: {
-      "line-color": "#10b981",
-      "line-width": 5,
-      "line-opacity": 0.8,
+      "line-color": "#2F80ED",
+      "line-width": 4,
+      "line-opacity": 0.9,
     },
   };
 
   return (
-    <div className="h-screen w-screen relative">
+    <div className="h-screen w-screen relative bg-[#F7F6F3]">
       {/* Map */}
       {mapError ? (
-        <div className="h-full w-full bg-slate-800 flex items-center justify-center">
+        <div className="h-full w-full flex items-center justify-center">
           <div className="text-center p-8">
-            <p className="text-red-400 mb-4">{mapError}</p>
+            <p className="text-[14px] text-[#E03E3E] mb-4">{mapError}</p>
             <button
               onClick={() => setMapError(null)}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+              className="px-4 py-2 bg-white border border-[#E3E2DF] text-[#37352F] rounded-md hover:bg-[#F7F6F3]"
             >
               Retry
             </button>
@@ -221,12 +212,11 @@ function NavigatePage() {
             zoom: 13,
           }}
           style={{ width: "100%", height: "100%" }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
+          mapStyle="mapbox://styles/mapbox/light-v11"
           onError={(e) => setMapError(e.error?.message || "Map failed to load")}
         >
-          <NavigationControl position="top-right" />
+          <NavigationControl position="top-right" showCompass={false} />
 
-          {/* Route Line */}
           {routeData?.geometry && (
             <Source
               id="route"
@@ -241,7 +231,6 @@ function NavigatePage() {
             </Source>
           )}
 
-          {/* Current Location Marker */}
           {location && (
             <Marker
               latitude={location.lat}
@@ -249,17 +238,16 @@ function NavigatePage() {
               anchor="center"
             >
               <div className="relative">
-                <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
-                <div className="absolute inset-0 w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30" />
+                <div className="w-4 h-4 bg-[#2F80ED] rounded-full border-2 border-white shadow-md" />
+                <div className="absolute -inset-2 bg-[#2F80ED]/20 rounded-full animate-ping" />
               </div>
             </Marker>
           )}
 
-          {/* Destination Marker */}
           {destLat && destLng && (
             <Marker latitude={destLat} longitude={destLng} anchor="bottom">
               <div className="flex flex-col items-center">
-                <div className="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#E03E3E] rounded-full border-2 border-white shadow-lg flex items-center justify-center">
                   <svg
                     className="w-4 h-4 text-white"
                     fill="currentColor"
@@ -272,7 +260,7 @@ function NavigatePage() {
                     />
                   </svg>
                 </div>
-                <div className="w-2 h-2 bg-red-500 rounded-full -mt-1" />
+                <div className="w-1 h-1 bg-[#E03E3E] rounded-full -mt-0.5" />
               </div>
             </Marker>
           )}
@@ -282,121 +270,128 @@ function NavigatePage() {
       {/* Back Button */}
       <button
         onClick={handleBack}
-        className="absolute top-4 left-4 z-10 p-3 bg-slate-800/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-slate-700 transition"
+        className="absolute top-4 left-4 z-10 w-10 h-10 bg-white border border-[#E3E2DF] rounded-lg shadow-sm hover:bg-[#F7F6F3] transition-colors flex items-center justify-center"
       >
         <svg
-          className="w-5 h-5 text-white"
+          className="w-5 h-5 text-[#37352F]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          strokeWidth={2}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M15 19l-7-7 7-7"
           />
         </svg>
       </button>
 
       {/* Navigation Info Panel */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <div className="bg-slate-800/95 backdrop-blur-sm rounded-t-3xl shadow-2xl p-6 pb-8">
-          {/* Destination */}
-          <div className="flex items-start gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-5 h-5 text-red-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">
-                Destination
-              </p>
-              <p className="text-white font-medium truncate">{address}</p>
-            </div>
+      <div className="absolute bottom-0 left-0 right-0 z-10 safe-area-bottom">
+        <div className="bg-white rounded-t-2xl shadow-lg border-t border-[#E3E2DF]">
+          {/* Handle */}
+          <div className="flex justify-center pt-3 pb-2">
+            <div className="w-10 h-1 bg-[#E3E2DF] rounded-full" />
           </div>
 
-          {/* Stats */}
-          {routeLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500" />
-            </div>
-          ) : routeData ? (
-            <div className="grid grid-cols-3 gap-4">
-              {/* Distance */}
-              <div className="bg-slate-700/50 rounded-xl p-4 text-center">
-                <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">
-                  Distance
-                </p>
-                <p className="text-2xl font-bold text-white">
-                  {formatDistance(routeData.distance)}
-                </p>
+          <div className="px-5 pb-6 sm:px-6">
+            {/* Destination */}
+            <div className="flex items-start gap-3 pb-5 border-b border-[#E3E2DF]">
+              <div className="w-10 h-10 rounded-lg bg-[#FBE4E4] flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-5 h-5 text-[#E03E3E]"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </div>
-
-              {/* Duration */}
-              <div className="bg-slate-700/50 rounded-xl p-4 text-center">
-                <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">
-                  Duration
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] text-[#9B9A97] uppercase tracking-wide mb-0.5">
+                  Destination
                 </p>
-                <p className="text-2xl font-bold text-white">
-                  {formatDuration(routeData.duration)}
-                </p>
-              </div>
-
-              {/* ETA */}
-              <div className="bg-emerald-500/20 rounded-xl p-4 text-center">
-                <p className="text-emerald-400 text-xs uppercase tracking-wide mb-1">
-                  ETA
-                </p>
-                <p className="text-2xl font-bold text-emerald-400">
-                  {formatETA(routeData.duration)}
+                <p className="text-[15px] text-[#37352F] font-medium truncate">
+                  {address}
                 </p>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-4 text-slate-400">
-              {!location
-                ? "Waiting for location..."
-                : "Unable to calculate route"}
-            </div>
-          )}
 
-          {/* Live indicator */}
-          {isWatching && !passedStartLat && (
-            <div className="flex items-center justify-center gap-2 mt-4 text-emerald-400 text-sm">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              <span>Live tracking active</span>
+            {/* Stats */}
+            <div className="pt-5">
+              {routeLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#E3E2DF] border-t-[#787774]" />
+                </div>
+              ) : routeData ? (
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center p-3 bg-[#F7F6F3] rounded-lg">
+                    <p className="text-[11px] text-[#9B9A97] uppercase tracking-wide mb-1">
+                      Distance
+                    </p>
+                    <p className="text-[20px] font-semibold text-[#37352F]">
+                      {formatDistance(routeData.distance)}
+                    </p>
+                  </div>
+                  <div className="text-center p-3 bg-[#F7F6F3] rounded-lg">
+                    <p className="text-[11px] text-[#9B9A97] uppercase tracking-wide mb-1">
+                      Duration
+                    </p>
+                    <p className="text-[20px] font-semibold text-[#37352F]">
+                      {formatDuration(routeData.duration)}
+                    </p>
+                  </div>
+                  <div className="text-center p-3 bg-[#E7F0FD] rounded-lg">
+                    <p className="text-[11px] text-[#2F80ED] uppercase tracking-wide mb-1">
+                      Arrival
+                    </p>
+                    <p className="text-[20px] font-semibold text-[#2F80ED]">
+                      {formatETA(routeData.duration)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4 text-[14px] text-[#787774]">
+                  {!location
+                    ? "Waiting for location..."
+                    : "Unable to calculate route"}
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Manual location indicator */}
-          {passedStartLat && passedStartLng && (
-            <div className="flex items-center justify-center gap-2 mt-4 text-cyan-400 text-sm">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Using manual start location</span>
-            </div>
-          )}
+            {/* Status */}
+            {(isWatching || (passedStartLat && passedStartLng)) && (
+              <div className="flex items-center justify-center gap-2 mt-4 text-[13px]">
+                {isWatching && !passedStartLat ? (
+                  <>
+                    <div className="w-2 h-2 bg-[#0F7B6C] rounded-full animate-pulse" />
+                    <span className="text-[#0F7B6C]">Live tracking</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-4 h-4 text-[#787774]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-[#787774]">Manual start point</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
