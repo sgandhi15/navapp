@@ -25,6 +25,8 @@ interface NavigateSearch {
   address: string;
   lat: number;
   lng: number;
+  startLat?: number;
+  startLng?: number;
 }
 
 export const Route = createFileRoute("/navigate")({
@@ -33,18 +35,33 @@ export const Route = createFileRoute("/navigate")({
       address: String(search.address || ""),
       lat: Number(search.lat) || 0,
       lng: Number(search.lng) || 0,
+      startLat: search.startLat ? Number(search.startLat) : undefined,
+      startLng: search.startLng ? Number(search.startLng) : undefined,
     };
   },
   component: NavigatePage,
 });
 
 function NavigatePage() {
-  const navigate = useNavigate();
-  const { address, lat: destLat, lng: destLng } = Route.useSearch();
+  const navRouter = useNavigate();
+  const {
+    address,
+    lat: destLat,
+    lng: destLng,
+    startLat: passedStartLat,
+    startLng: passedStartLng,
+  } = Route.useSearch();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { location, isWatching, startWatching, stopWatching } =
+  const { location: geoLocation, isWatching, startWatching, stopWatching } =
     useGeolocation();
   const { saveAddress } = useAddresses();
+
+  // Use passed location or geolocation
+  const location =
+    passedStartLat && passedStartLng
+      ? { lat: passedStartLat, lng: passedStartLng, accuracy: 0 }
+      : geoLocation;
+
   const {
     data: routeData,
     isLoading: routeLoading,
@@ -53,19 +70,22 @@ function NavigatePage() {
 
   const mapRef = useRef<MapRef>(null);
   const [hasSavedAddress, setHasSavedAddress] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navigate({ to: "/login" });
+      navRouter({ to: "/login" });
     }
-  }, [authLoading, isAuthenticated, navigate]);
+  }, [authLoading, isAuthenticated, navRouter]);
 
-  // Start watching location when component mounts
+  // Start watching location when component mounts (only if not using passed location)
   useEffect(() => {
-    startWatching();
-    return () => stopWatching();
-  }, [startWatching, stopWatching]);
+    if (!passedStartLat || !passedStartLng) {
+      startWatching();
+      return () => stopWatching();
+    }
+  }, [startWatching, stopWatching, passedStartLat, passedStartLng]);
 
   // Save address to history (only once)
   useEffect(() => {
@@ -90,25 +110,63 @@ function NavigatePage() {
     }
   }, [location?.lat, location?.lng, destLat, destLng]);
 
-  // Refetch route when location changes significantly
+  // Refetch route when location changes significantly (only for live tracking)
   useEffect(() => {
-    if (location && isWatching) {
+    if (geoLocation && isWatching && !passedStartLat) {
       const timer = setTimeout(() => {
         refetchRoute();
-      }, 5000); // Refetch every 5 seconds while watching
+      }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [location?.lat, location?.lng, isWatching, refetchRoute]);
+  }, [geoLocation?.lat, geoLocation?.lng, isWatching, refetchRoute, passedStartLat]);
 
   const handleBack = () => {
     stopWatching();
-    navigate({ to: "/home" });
+    navRouter({ to: "/home" });
   };
 
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
+      </div>
+    );
+  }
+
+  // Check for Mapbox token
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className="h-screen w-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-2xl p-8 max-w-md text-center border border-slate-700">
+          <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">
+            Map Configuration Missing
+          </h2>
+          <p className="text-slate-400 text-sm mb-4">
+            Mapbox token is not configured. Please add VITE_MAPBOX_TOKEN to your
+            environment variables.
+          </p>
+          <button
+            onClick={handleBack}
+            className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -131,68 +189,85 @@ function NavigatePage() {
   return (
     <div className="h-screen w-screen relative">
       {/* Map */}
-      <Map
-        ref={mapRef}
-        mapboxAccessToken={MAPBOX_TOKEN}
-        initialViewState={{
-          latitude: destLat,
-          longitude: destLng,
-          zoom: 13,
-        }}
-        style={{ width: "100%", height: "100%" }}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
-      >
-        <NavigationControl position="top-right" />
-
-        {/* Route Line */}
-        {routeData?.geometry && (
-          <Source
-            id="route"
-            type="geojson"
-            data={{
-              type: "Feature",
-              properties: {},
-              geometry: routeData.geometry,
-            }}
-          >
-            <Layer {...routeLayer} />
-          </Source>
-        )}
-
-        {/* Current Location Marker */}
-        {location && (
-          <Marker
-            latitude={location.lat}
-            longitude={location.lng}
-            anchor="center"
-          >
-            <div className="relative">
-              <div className="w-6 h-6 bg-blue-500 rounded-full border-3 border-white shadow-lg animate-pulse" />
-              <div className="absolute inset-0 w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30" />
-            </div>
-          </Marker>
-        )}
-
-        {/* Destination Marker */}
-        <Marker latitude={destLat} longitude={destLng} anchor="bottom">
-          <div className="flex flex-col items-center">
-            <div className="w-8 h-8 bg-red-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="w-2 h-2 bg-red-500 rounded-full -mt-1" />
+      {mapError ? (
+        <div className="h-full w-full bg-slate-800 flex items-center justify-center">
+          <div className="text-center p-8">
+            <p className="text-red-400 mb-4">{mapError}</p>
+            <button
+              onClick={() => setMapError(null)}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+            >
+              Retry
+            </button>
           </div>
-        </Marker>
-      </Map>
+        </div>
+      ) : (
+        <Map
+          ref={mapRef}
+          mapboxAccessToken={MAPBOX_TOKEN}
+          initialViewState={{
+            latitude: destLat || 47.6062,
+            longitude: destLng || -122.3321,
+            zoom: 13,
+          }}
+          style={{ width: "100%", height: "100%" }}
+          mapStyle="mapbox://styles/mapbox/dark-v11"
+          onError={(e) => setMapError(e.error?.message || "Map failed to load")}
+        >
+          <NavigationControl position="top-right" />
+
+          {/* Route Line */}
+          {routeData?.geometry && (
+            <Source
+              id="route"
+              type="geojson"
+              data={{
+                type: "Feature",
+                properties: {},
+                geometry: routeData.geometry,
+              }}
+            >
+              <Layer {...routeLayer} />
+            </Source>
+          )}
+
+          {/* Current Location Marker */}
+          {location && (
+            <Marker
+              latitude={location.lat}
+              longitude={location.lng}
+              anchor="center"
+            >
+              <div className="relative">
+                <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
+                <div className="absolute inset-0 w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30" />
+              </div>
+            </Marker>
+          )}
+
+          {/* Destination Marker */}
+          {destLat && destLng && (
+            <Marker latitude={destLat} longitude={destLng} anchor="bottom">
+              <div className="flex flex-col items-center">
+                <div className="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="w-2 h-2 bg-red-500 rounded-full -mt-1" />
+              </div>
+            </Marker>
+          )}
+        </Map>
+      )}
 
       {/* Back Button */}
       <button
@@ -286,10 +361,20 @@ function NavigatePage() {
           )}
 
           {/* Live indicator */}
-          {isWatching && (
+          {isWatching && !passedStartLat && (
             <div className="flex items-center justify-center gap-2 mt-4 text-emerald-400 text-sm">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               <span>Live tracking active</span>
+            </div>
+          )}
+
+          {/* Manual location indicator */}
+          {passedStartLat && passedStartLng && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-cyan-400 text-sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Using manual start location</span>
             </div>
           )}
         </div>
