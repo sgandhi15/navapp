@@ -80,7 +80,8 @@ function LandingPage() {
             Navigate anywhere
           </h1>
           <p className="text-[18px] text-[#787774] mb-10 max-w-md mx-auto">
-            Real-time navigation with live tracking. Get directions and estimated arrival times instantly.
+            Real-time navigation with live tracking. Get directions and
+            estimated arrival times instantly.
           </p>
 
           {/* CTA */}
@@ -95,24 +96,54 @@ function LandingPage() {
           <div className="mt-16 grid grid-cols-3 gap-6 text-center">
             <div>
               <div className="w-10 h-10 rounded-lg bg-[#E7F0FD] flex items-center justify-center mx-auto mb-3">
-                <svg className="w-5 h-5 text-[#2F80ED]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <svg
+                  className="w-5 h-5 text-[#2F80ED]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
                 </svg>
               </div>
               <p className="text-[13px] text-[#787774]">Live GPS tracking</p>
             </div>
             <div>
               <div className="w-10 h-10 rounded-lg bg-[#DBEDDB] flex items-center justify-center mx-auto mb-3">
-                <svg className="w-5 h-5 text-[#0F7B6C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5 text-[#0F7B6C]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <p className="text-[13px] text-[#787774]">Real-time ETA</p>
             </div>
             <div>
               <div className="w-10 h-10 rounded-lg bg-[#FBF3DB] flex items-center justify-center mx-auto mb-3">
-                <svg className="w-5 h-5 text-[#9D6B0A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                <svg
+                  className="w-5 h-5 text-[#9D6B0A]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
                 </svg>
               </div>
               <p className="text-[13px] text-[#787774]">Save destinations</p>

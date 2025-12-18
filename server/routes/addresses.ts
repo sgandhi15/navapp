@@ -1,7 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import { db, schema } from "../db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -41,7 +41,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Save new address
+// Save new address (or update timestamp if exists)
 router.post("/", async (req, res) => {
   const userId = getUserId(req);
   if (!userId) {
@@ -55,6 +55,32 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Address, lat, and lng are required" });
     }
 
+    // Check if this address already exists for this user (by coordinates)
+    // Using a small tolerance for floating point comparison
+    const existing = await db
+      .select()
+      .from(schema.addresses)
+      .where(
+        and(
+          eq(schema.addresses.userId, userId),
+          eq(schema.addresses.lat, lat),
+          eq(schema.addresses.lng, lng)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Update the timestamp to move it to top of recents
+      const [updated] = await db
+        .update(schema.addresses)
+        .set({ createdAt: new Date(), address })
+        .where(eq(schema.addresses.id, existing[0].id))
+        .returning();
+
+      return res.json({ address: updated });
+    }
+
+    // Create new address
     const [newAddress] = await db
       .insert(schema.addresses)
       .values({ userId, address, lat, lng })
