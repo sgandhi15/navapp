@@ -4,7 +4,8 @@ import { db, schema } from "../db";
 import { eq, desc, and } from "drizzle-orm";
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 // Middleware to verify token and get user ID
 function getUserId(req: any): number | null {
@@ -52,7 +53,9 @@ router.post("/", async (req, res) => {
     const { address, lat, lng } = req.body;
 
     if (!address || lat === undefined || lng === undefined) {
-      return res.status(400).json({ message: "Address, lat, and lng are required" });
+      return res
+        .status(400)
+        .json({ message: "Address, lat, and lng are required" });
     }
 
     // Check if this address already exists for this user (by coordinates)
@@ -74,7 +77,7 @@ router.post("/", async (req, res) => {
       const [updated] = await db
         .update(schema.addresses)
         .set({ createdAt: new Date(), address })
-        .where(eq(schema.addresses.id, existing[0].id))
+        .where(eq(schema.addresses.id, existing[0]?.id ?? 0))
         .returning();
 
       return res.json({ address: updated });
@@ -124,4 +127,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
-

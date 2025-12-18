@@ -19,7 +19,9 @@ function HomePage() {
     addresses,
     isLoading: addressesLoading,
     deleteAddress,
+    isDeleting,
   } = useAddresses();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const {
     location,
     error: locationError,
@@ -391,27 +393,39 @@ function HomePage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      setDeletingId(addr.id);
                       deleteAddress(addr.id, {
-                        onSuccess: () => showToast("Removed", "success"),
-                        onError: () => showToast("Failed to remove", "error"),
+                        onSuccess: () => {
+                          setDeletingId(null);
+                          showToast("Removed", "success");
+                        },
+                        onError: () => {
+                          setDeletingId(null);
+                          showToast("Failed to remove", "error");
+                        },
                       });
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:bg-[#FBE4E4] rounded-md transition-all"
+                    disabled={isDeleting && deletingId === addr.id}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:bg-[#FBE4E4] rounded-md transition-all disabled:opacity-100"
                     title="Remove"
                   >
-                    <svg
-                      className="w-4 h-4 text-[#9B9A97] hover:text-[#E03E3E]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    {isDeleting && deletingId === addr.id ? (
+                      <div className="w-4 h-4 border-2 border-[#E3E2DF] border-t-[#787774] rounded-full animate-spin" />
+                    ) : (
+                      <svg
+                        className="w-4 h-4 text-[#9B9A97] hover:text-[#E03E3E]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    )}
                   </button>
                 </div>
               ))}
@@ -490,6 +504,17 @@ function HomePage() {
                     {selectedDestination.address.split(",").slice(1).join(",")}
                   </p>
                 </div>
+              </div>
+
+              {/* Transport Mode */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#E7F0FD] text-[#2F80ED] rounded-full">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                  </svg>
+                  <span className="text-[12px] font-medium">Driving</span>
+                </div>
+                <span className="text-[12px] text-[#9B9A97]">Fastest route</span>
               </div>
 
               {/* ETA Info */}
