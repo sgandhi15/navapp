@@ -6,31 +6,31 @@ Real-time navigation web application with live GPS tracking, distance calculatio
 
 ## Features
 
-- 🔐 **User Authentication** - Register, login, secure sessions
-- 📍 **Live GPS Tracking** - Real-time location updates
-- 🔍 **Address Search** - Autocomplete powered by Mapbox
-- 🗺️ **Interactive Maps** - Route visualization with Mapbox GL
-- ⏱️ **Real-time ETA** - Distance and arrival time calculations
-- 📜 **Address History** - Quick access to recent destinations
-- 🚗 **Driving Directions** - Optimal route calculation
+- **User Authentication** - Register, login, secure sessions
+- **Live GPS Tracking** - Real-time location updates
+- **Address Search** - Autocomplete powered by Mapbox
+- **Interactive Maps** - Route visualization with Mapbox GL
+- **Real-time ETA** - Distance and arrival time calculations
+- **Address History** - Quick access to recent destinations
+- **Driving Directions** - Optimal route calculation
 
 ## Tech Stack
 
-| Frontend | Backend |
-|----------|---------|
-| React 18 | Express.js |
-| TanStack Router | PostgreSQL |
-| TanStack Query | Drizzle ORM |
-| Mapbox GL | JWT Auth |
-| Tailwind CSS | TypeScript |
+| Frontend        | Backend     |
+| --------------- | ----------- |
+| React           | Express.js  |
+| TanStack Router | PostgreSQL  |
+| TanStack Query  | Drizzle ORM |
+| Mapbox GL       | JWT Auth    |
+| Tailwind CSS    | TypeScript  |
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ or [Bun](https://bun.sh)
-- PostgreSQL database ([Supabase](https://supabase.com) or [Neon](https://neon.tech) recommended)
-- [Mapbox](https://mapbox.com) account (free tier)
+- PostgreSQL database ([Supabase](https://supabase.com))
+- [Mapbox](https://mapbox.com) account
 
 ### 1. Clone & Install
 
@@ -46,6 +46,7 @@ cd frontend && bun install && cd ..
 ### 2. Configure Environment
 
 **Backend** (`server/.env`):
+
 ```env
 PORT=8080
 DATABASE_URL=postgresql://...
@@ -55,6 +56,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 **Frontend** (`frontend/.env`):
+
 ```env
 VITE_API_URL=http://localhost:8080
 VITE_MAPBOX_TOKEN=pk.xxx
@@ -71,17 +73,51 @@ bun run db:push
 ### 4. Run Development Servers
 
 **Terminal 1 - Backend:**
+
 ```bash
 bun dev
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend && bun dev
 ```
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8080
+
+## Deployment (Fly.io)
+
+Deploy as a single app where backend serves the frontend:
+
+### 1. Install Fly CLI
+
+```bash
+curl -L https://fly.io/install.sh | sh
+fly auth login
+```
+
+### 2. Set Secrets
+
+```bash
+fly secrets set DATABASE_URL="postgresql://..."
+fly secrets set JWT_SECRET="your-secret-key"
+fly secrets set MAPBOX_ACCESS_TOKEN="sk.xxx"
+```
+
+### 3. Deploy
+
+```bash
+fly deploy
+```
+
+Your app will be live at `https://navapp.fly.dev`
+
+> **Note:** Update `frontend/.env` before building:
+> ```env
+> VITE_API_URL=https://navapp.fly.dev
+> ```
 
 ## Project Structure
 
@@ -102,22 +138,44 @@ navapp/
 └── drizzle.config.ts   # Database config
 ```
 
-## API Overview
+## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Create account |
-| `/api/auth/login` | POST | Login |
-| `/api/auth/me` | GET | Get current user |
-| `/api/addresses` | GET | List saved addresses |
-| `/api/addresses` | POST | Save address |
-| `/api/geocode` | GET | Search addresses |
-| `/api/route` | GET | Get driving route |
+### Authentication
+
+| Method | Endpoint             | Description        |
+| ------ | -------------------- | ------------------ |
+| POST   | `/api/auth/register` | Create new account |
+| POST   | `/api/auth/login`    | Login & get token  |
+| GET    | `/api/auth/me`       | Get current user   |
+
+### Addresses
+
+| Method | Endpoint             | Description                |
+| ------ | -------------------- | -------------------------- |
+| GET    | `/api/addresses`     | Get user's saved addresses |
+| POST   | `/api/addresses`     | Save new address           |
+| DELETE | `/api/addresses/:id` | Delete address             |
+
+### Mapbox Proxy
+
+| Method | Endpoint                                     | Description      |
+| ------ | -------------------------------------------- | ---------------- |
+| GET    | `/api/geocode?q=query`                       | Search addresses |
+| GET    | `/api/route?startLat&startLng&endLat&endLng` | Get route        |
 
 ## Screenshots
 
-*Add your screenshots here*
+### Landing & Authentication
 
-## License
+| Landing Page | Login | Register |
+|--------------|-------|----------|
+| ![Home](assets/home-screen.png) | ![Login](assets/login-screen.png) | ![Register](assets/register-screen.png) |
 
-MIT
+### Navigation Flow
+
+| Address Search | Route Preview | Map Navigation |
+|----------------|---------------|----------------|
+| ![Autocomplete](assets/auto-complete.png) | ![ETA](assets/eta.png) | ![Map](assets/map-showing.png) |
+
+### Auth Check
+![Auth Check](assets/auth-check.png)
