@@ -91,7 +91,7 @@ function HomePage() {
         </div>
 
         {/* Search Section */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 mb-8">
+        <div className="relative z-20 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 mb-8">
           <h2 className="text-lg font-semibold text-white mb-4">Where do you want to go?</h2>
           
           <div className="relative">
@@ -109,7 +109,7 @@ function HomePage() {
             
             {/* Suggestions Dropdown */}
             {showSuggestions && searchQuery.length >= 3 && (
-              <div className="absolute z-10 w-full mt-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+              <div className="absolute z-50 w-full mt-2 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
                 {suggestionsLoading ? (
                   <div className="p-4 text-center text-slate-400">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500 mx-auto" />
@@ -188,7 +188,7 @@ function HomePage() {
       {/* Click outside to close suggestions */}
       {showSuggestions && (
         <div
-          className="fixed inset-0 z-0"
+          className="fixed inset-0 z-10"
           onClick={() => setShowSuggestions(false)}
         />
       )}

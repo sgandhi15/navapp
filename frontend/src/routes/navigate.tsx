@@ -1,6 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import Map, { Marker, Source, Layer, NavigationControl } from "react-map-gl/mapbox";
+import Map, {
+  Marker,
+  Source,
+  Layer,
+  NavigationControl,
+} from "react-map-gl/mapbox";
 import type { MapRef } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 
