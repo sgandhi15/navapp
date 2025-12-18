@@ -6,7 +6,6 @@
   "scripts": {
     "start": "bun run server/index.ts",
     "dev": "bun run --watch server/index.ts",
-    "build": "tsc -p tsconfig.build.json",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },

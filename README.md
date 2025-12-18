@@ -87,38 +87,6 @@ cd frontend && bun dev
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8080
 
-## Deployment (Fly.io)
-
-Deploy as a single app where backend serves the frontend:
-
-### 1. Install Fly CLI
-
-```bash
-curl -L https://fly.io/install.sh | sh
-fly auth login
-```
-
-### 2. Set Secrets
-
-```bash
-fly secrets set DATABASE_URL="postgresql://..."
-fly secrets set JWT_SECRET="your-secret-key"
-fly secrets set MAPBOX_ACCESS_TOKEN="sk.xxx"
-```
-
-### 3. Deploy
-
-```bash
-fly deploy
-```
-
-Your app will be live at `https://navapp.fly.dev`
-
-> **Note:** Update `frontend/.env` before building:
-> ```env
-> VITE_API_URL=https://navapp.fly.dev
-> ```
-
 ## Project Structure
 
 ```
@@ -167,15 +135,16 @@ navapp/
 
 ### Landing & Authentication
 
-| Landing Page | Login | Register |
-|--------------|-------|----------|
+| Landing Page                    | Login                             | Register                                |
+| ------------------------------- | --------------------------------- | --------------------------------------- |
 | ![Home](assets/home-screen.png) | ![Login](assets/login-screen.png) | ![Register](assets/register-screen.png) |
 
 ### Navigation Flow
 
-| Address Search | Route Preview | Map Navigation |
-|----------------|---------------|----------------|
+| Address Search                            | Route Preview          | Map Navigation                 |
+| ----------------------------------------- | ---------------------- | ------------------------------ |
 | ![Autocomplete](assets/auto-complete.png) | ![ETA](assets/eta.png) | ![Map](assets/map-showing.png) |
 
 ### Auth Check
+
 ![Auth Check](assets/auth-check.png)
