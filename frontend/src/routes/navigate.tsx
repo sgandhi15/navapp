@@ -55,7 +55,7 @@ function NavigatePage() {
   useEffect(() => {
     startWatching()
     return () => stopWatching()
-  }, [])
+  }, [startWatching, stopWatching])
 
   // Save address to history (only once)
   useEffect(() => {
