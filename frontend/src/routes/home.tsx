@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useAddresses } from "../hooks/useAddresses";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useGeocode } from "../hooks/useGeocode";
+import { useToast } from "../components/Toast";
 
 export const Route = createFileRoute("/home")({
   component: HomePage,
@@ -11,8 +12,9 @@ export const Route = createFileRoute("/home")({
 
 function HomePage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { addresses, isLoading: addressesLoading } = useAddresses();
+  const { addresses, isLoading: addressesLoading, deleteAddress } = useAddresses();
   const {
     location,
     error: locationError,
@@ -365,16 +367,39 @@ function HomePage() {
           ) : addresses.length > 0 ? (
             <div className="space-y-2">
               {addresses.map((addr) => (
-                <button
+                <div
                   key={addr.id}
-                  onClick={() =>
-                    handleSelectDestination(addr.address, addr.lat, addr.lng)
-                  }
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition flex items-start gap-3 text-left group"
+                  className="relative group"
                 >
-                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition">
+                  <button
+                    onClick={() =>
+                      handleSelectDestination(addr.address, addr.lat, addr.lng)
+                    }
+                    className="w-full px-4 py-3 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition flex items-start gap-3 text-left"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/20 transition">
+                      <svg
+                        className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0 pr-8">
+                      <p className="text-white text-sm truncate">{addr.address}</p>
+                      <p className="text-slate-500 text-xs mt-0.5">
+                        {new Date(addr.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                     <svg
-                      className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition"
+                      className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -383,30 +408,37 @@ function HomePage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M9 5l7 7-7 7"
                       />
                     </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm truncate">{addr.address}</p>
-                    <p className="text-slate-500 text-xs mt-0.5">
-                      {new Date(addr.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <svg
-                    className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  </button>
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteAddress(addr.id, {
+                        onSuccess: () => showToast("Address removed", "success"),
+                        onError: () => showToast("Failed to remove address", "error"),
+                      });
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 rounded-lg transition"
+                    title="Remove from history"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-4 h-4 text-slate-400 hover:text-red-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           ) : (

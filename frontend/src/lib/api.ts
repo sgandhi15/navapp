@@ -9,7 +9,12 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   };
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    if (headers instanceof Headers) {
+      headers.set("Authorization", `Bearer ${token}`);
+    } else if (typeof headers === "object") {
+      // Typescript tip: index signature assertion, since HeadersInit type allows record
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+    }
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
