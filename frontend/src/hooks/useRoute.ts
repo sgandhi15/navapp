@@ -16,16 +16,20 @@ export function useRoute(
   endLat: number,
   endLng: number
 ) {
+  // Round coordinates to 4 decimal places (~11m precision) to avoid excessive refetches
+  const roundedStartLat = startLat !== null ? Math.round(startLat * 10000) / 10000 : null
+  const roundedStartLng = startLng !== null ? Math.round(startLng * 10000) / 10000 : null
+  
   return useQuery({
-    queryKey: ['route', startLat, startLng, endLat, endLng],
+    queryKey: ['route', roundedStartLat, roundedStartLng, endLat, endLng],
     queryFn: async () => {
       if (startLat === null || startLng === null) return null
       const response = await api.getRoute(startLat, startLng, endLat, endLng)
       return response as RouteData
     },
     enabled: startLat !== null && startLng !== null,
-    staleTime: 1000 * 30, // Cache for 30 seconds
-    refetchInterval: 1000 * 60, // Refetch every minute
+    staleTime: 0, // Always consider data stale so location changes trigger updates
+    gcTime: 1000 * 60, // Keep in cache for 1 minute
   })
 }
 

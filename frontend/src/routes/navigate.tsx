@@ -65,11 +65,12 @@ function NavigatePage() {
       ? { lat: passedStartLat, lng: passedStartLng, accuracy: 0 }
       : geoLocation;
 
-  const {
-    data: routeData,
-    isLoading: routeLoading,
-    refetch: refetchRoute,
-  } = useRoute(location?.lat ?? null, location?.lng ?? null, destLat, destLng);
+  const { data: routeData, isLoading: routeLoading } = useRoute(
+    location?.lat ?? null,
+    location?.lng ?? null,
+    destLat,
+    destLng
+  );
 
   const mapRef = useRef<MapRef>(null);
   const hasSavedRef = useRef(false);
@@ -109,20 +110,6 @@ function NavigatePage() {
     }
   }, [location?.lat, location?.lng, destLat, destLng]);
 
-  useEffect(() => {
-    if (geoLocation && isWatching && !passedStartLat) {
-      const timer = setTimeout(() => {
-        refetchRoute();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [
-    geoLocation?.lat,
-    geoLocation?.lng,
-    isWatching,
-    refetchRoute,
-    passedStartLat,
-  ]);
 
   const handleBack = () => {
     stopWatching();
