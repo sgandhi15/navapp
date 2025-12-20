@@ -4,7 +4,11 @@ Real-time navigation web application with live GPS tracking, distance calculatio
 
 ![NavApp](https://img.shields.io/badge/NavApp-Navigation-2F80ED)
 
-Checkout the live demo [here](https://navapp.fly.dev).
+<p align="center">
+  <a href="https://navapp.fly.dev" target="_blank" style="display: inline-block; padding: 1em 2em; font-size: 1.25em; font-weight: bold; color: white; background: #2F80ED; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+    Try the NavApp Live Demo
+  </a>
+</p>
 
 ## Features
 
