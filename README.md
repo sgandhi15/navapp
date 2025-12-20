@@ -4,6 +4,8 @@ Real-time navigation web application with live GPS tracking, distance calculatio
 
 ![NavApp](https://img.shields.io/badge/NavApp-Navigation-2F80ED)
 
+Checkout the live demo [here](https://navapp.fly.dev).
+
 ## Features
 
 - **User Authentication** - Register, login, secure sessions
