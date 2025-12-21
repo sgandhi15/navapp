@@ -74,7 +74,9 @@ function NavigatePage() {
 
   const mapRef = useRef<MapRef>(null);
   const hasSavedRef = useRef(false);
+  const hasInitialFitRef = useRef(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [isFollowing, setIsFollowing] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -96,8 +98,10 @@ function NavigatePage() {
     }
   }, [address, destLat, destLng, saveAddress]);
 
+  // Initial fit to show both user and destination
   useEffect(() => {
-    if (location && mapRef.current) {
+    if (location && mapRef.current && !hasInitialFitRef.current) {
+      hasInitialFitRef.current = true;
       const bounds = [
         [Math.min(location.lng, destLng), Math.min(location.lat, destLat)],
         [Math.max(location.lng, destLng), Math.max(location.lat, destLat)],
@@ -108,7 +112,28 @@ function NavigatePage() {
         duration: 1000,
       });
     }
-  }, [location?.lat, location?.lng, destLat, destLng]);
+  }, [location, destLat, destLng]);
+
+  // Follow user's location as they move
+  useEffect(() => {
+    if (geoLocation && mapRef.current && isFollowing && isWatching) {
+      mapRef.current.easeTo({
+        center: [geoLocation.lng, geoLocation.lat],
+        duration: 500,
+      });
+    }
+  }, [geoLocation?.lat, geoLocation?.lng, isFollowing, isWatching]);
+
+  const handleRecenter = () => {
+    if (geoLocation && mapRef.current) {
+      setIsFollowing(true);
+      mapRef.current.flyTo({
+        center: [geoLocation.lng, geoLocation.lat],
+        zoom: 15,
+        duration: 1000,
+      });
+    }
+  };
 
 
   const handleBack = () => {
@@ -201,6 +226,7 @@ function NavigatePage() {
           style={{ width: "100%", height: "100%" }}
           mapStyle="mapbox://styles/mapbox/light-v11"
           onError={(e) => setMapError(e.error?.message || "Map failed to load")}
+          onDragStart={() => setIsFollowing(false)}
         >
           <NavigationControl position="top-right" showCompass={false} />
 
@@ -273,6 +299,30 @@ function NavigatePage() {
           />
         </svg>
       </button>
+
+      {/* Recenter Button - shows when not following */}
+      {isWatching && !isFollowing && geoLocation && (
+        <button
+          onClick={handleRecenter}
+          className="absolute bottom-72 right-4 z-10 w-12 h-12 bg-white border border-[#E3E2DF] rounded-full shadow-lg hover:bg-[#F7F6F3] transition-colors flex items-center justify-center"
+          title="Recenter on my location"
+        >
+          <svg
+            className="w-6 h-6 text-[#2F80ED]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 2v4m0 12v4m10-10h-4M6 12H2"
+            />
+          </svg>
+        </button>
+      )}
 
       {/* Navigation Info Panel */}
       <div className="absolute bottom-0 left-0 right-0 z-10 safe-area-bottom">
